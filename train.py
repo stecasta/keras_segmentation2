@@ -70,7 +70,7 @@ def train(model,
           optimizer_name='adadelta',
           do_augment=False,
           augmentation_name="aug_all",
-          # Callbacks=None,
+          Callbacks=None,
           metrics_name='accuracy'
           ):
 
@@ -151,10 +151,11 @@ def train(model,
             val_images, val_annotations,  val_batch_size,
             n_classes, input_height, input_width, output_height, output_width)
 
-    callbacks = [
-        # Callbacks,
-        CheckpointsCallback(checkpoints_path)
-    ]
+    # callbacks = [
+    #     # Callbacks,
+    #     CheckpointsCallback(checkpoints_path)
+    # ]
+    callbacks = Callbacks
 
     if not validate:
         model_history = model.fit_generator(train_gen, steps_per_epoch,
@@ -165,6 +166,7 @@ def train(model,
                             validation_data=val_gen,
                             validation_steps=val_steps_per_epoch,
                             epochs=epochs, callbacks=callbacks,
-                            use_multiprocessing=gen_use_multiprocessing)
+                            use_multiprocessing=gen_use_multiprocessing,
+                            )
 
     return model_history
