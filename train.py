@@ -71,7 +71,8 @@ def train(model,
           do_augment=False,
           augmentation_name="aug_all",
           Callbacks=None,
-          metrics_name='accuracy'
+          metrics_name='accuracy',
+          loss_name=None
           ):
 
     from .models.all_models import model_from_name
@@ -101,6 +102,9 @@ def train(model,
             loss_k = masked_categorical_crossentropy
         else:
             loss_k = 'categorical_crossentropy'
+
+        if loss_name is not None:
+            loss_k = loss_name
 
         model.compile(loss=loss_k,
                       optimizer=optimizer_name,
