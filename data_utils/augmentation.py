@@ -3,6 +3,7 @@ import numpy as np
 try:
     import imgaug as ia
     from imgaug import augmenters as iaa
+    ia.seed(1)
 except ImportError:
     print("Error in loading augmentation, can't import imgaug."
           "Please make sure it is installed.")
@@ -13,6 +14,20 @@ IMAGE_AUGMENTATION_NUM_TRIES = 10
 
 loaded_augmentation_name = ""
 
+
+def _load_augmentation_aug_piv():
+    return iaa.Sequential([
+        iaa.Sometimes(0.5, iaa.AllChannelsCLAHE()),
+        iaa.Fliplr(0.5),  # horizontally flip 50% of all images
+        iaa.Sometimes(0.33, iaa.Affine(
+            rotate=(-5, 5),  # rotate by -45 to +45 degrees
+            order=[0, 1],
+            # if mode is constant, use a cval between 0 and 255
+            mode='constant',
+            cval=1,
+        ))
+    ]
+    )
 
 def _load_augmentation_aug_geometric():
     return iaa.OneOf([
@@ -184,7 +199,8 @@ augmentation_functions = {
     "aug_all": _load_augmentation_aug_all,
     "aug_all2": _load_augmentation_aug_all2,
     "aug_geometric": _load_augmentation_aug_geometric,
-    "aug_non_geometric": _load_augmentation_aug_non_geometric
+    "aug_non_geometric": _load_augmentation_aug_non_geometric,
+    "aug_piv": _load_augmentation_aug_piv
 }
 
 
@@ -212,8 +228,8 @@ def _augment_seg(img, seg, augmentation_name="aug_all"):
     # Augment the input image
     image_aug = aug_det.augment_image(img)
 
-    segmap = ia.SegmentationMapOnImage(
-        seg, nb_classes=np.max(seg) + 1, shape=img.shape)
+    segmap = ia.SegmentationMapOnImage(seg, nb_classes = np.max(seg) + 1, shape = img.shape)
+
     segmap_aug = aug_det.augment_segmentation_maps(segmap)
     segmap_aug = segmap_aug.get_arr_int()
 
