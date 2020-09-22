@@ -24,10 +24,44 @@ def _load_augmentation_aug_piv():
             order=[0, 1],
             # if mode is constant, use a cval between 0 and 255
             mode='constant',
-            cval=1,
+            cval=0,
         ))
     ]
     )
+
+
+def _load_augmentation_aug_piv2():
+    return iaa.Sequential([
+        iaa.Sometimes(0.5, iaa.AllChannelsCLAHE()),
+        iaa.Fliplr(0.5),  # horizontally flip 50% of all images
+        iaa.Sometimes(0.5,iaa.OneOf([
+            iaa.Affine(
+                rotate=(-5, 5),  # rotate by -45 to +45 degrees
+                order=[0, 1],
+                # if mode is constant, use a cval between 0 and 255
+                mode='constant',
+                cval=0),
+            iaa.Affine(
+                translate_percent={"x": (-0.1, 0.1), "y": (-0.1, 0.1)},
+                order=[0, 1],
+                # if mode is constant, use a cval between 0 and 255
+                mode='constant',
+                cval=0),
+            iaa.Affine(
+                shear=(-5, 5),  # shear by -16 to +16 degrees
+                order=[0, 1],
+                # if mode is constant, use a cval between 0 and 255
+                mode='constant',
+                cval=0),
+            iaa.Affine(
+                scale={"x": (0.9, 1.1), "y": (0.9, 1.1)},
+                order=[0, 1],
+                # if mode is constant, use a cval between 0 and 255
+                mode='constant',
+                cval=0),
+        ]))
+    ])
+
 
 def _load_augmentation_aug_geometric():
     return iaa.OneOf([
@@ -200,7 +234,8 @@ augmentation_functions = {
     "aug_all2": _load_augmentation_aug_all2,
     "aug_geometric": _load_augmentation_aug_geometric,
     "aug_non_geometric": _load_augmentation_aug_non_geometric,
-    "aug_piv": _load_augmentation_aug_piv
+    "aug_piv": _load_augmentation_aug_piv,
+    "aug_piv2": _load_augmentation_aug_piv2
 }
 
 
