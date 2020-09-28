@@ -34,7 +34,7 @@ def get_pairs_from_paths(images_path, segs_path, ignore_non_matching=False):
         while checking integrity of data """
 
     ACCEPTABLE_IMAGE_FORMATS = [".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"]
-    ACCEPTABLE_SEGMENTATION_FORMATS = [".png", ".bmp"]
+    ACCEPTABLE_SEGMENTATION_FORMATS = [".png", ".bmp", ".tif", ".tiff"]
 
     image_files = []
     segmentation_files = {}
@@ -110,6 +110,7 @@ def get_image_array(image_input,
 
     if ordering == 'channels_first':
         img = np.rollaxis(img, 2, 0)
+
     return img
 
 
@@ -134,12 +135,12 @@ def get_segmentation_array(image_input, nClasses,
 
     img = cv2.resize(img, (width, height), interpolation=cv2.INTER_NEAREST)
     img = img[:, :, 0]
-
-    for c in range(nClasses):
-        seg_labels[:, :, c] = (img == c).astype(int)
-
-    if not no_reshape:
-        seg_labels = np.reshape(seg_labels, (width*height, nClasses))
+    seg_labels = np.zeros((width, height, 1))
+    # for c in range(nClasses):
+    #     seg_labels[:, :, c] = (img == c).astype(int)
+    seg_labels[:, :, 0] = (img == 1).astype(int)
+    # if not no_reshape:
+    #     seg_labels = np.reshape(seg_labels, (width*height, nClasses))
 
     return seg_labels
 
@@ -194,12 +195,17 @@ def image_segmentation_generator(images_path, segs_path, batch_size,
 
     img_seg_pairs = get_pairs_from_paths(images_path, segs_path)
     random.shuffle(img_seg_pairs)
+    # i = 0
     zipped = itertools.cycle(img_seg_pairs)
-
     while True:
         X = []
         Y = []
         for _ in range(batch_size):
+            # if i == len(img_seg_pairs):
+            #     i = 0
+            #     random.shuffle(img_seg_pairs)
+            #     zipped = itertools.cycle(img_seg_pairs)
+
             im, seg = next(zipped)
 
             im = cv2.imread(im, 1)
@@ -213,5 +219,7 @@ def image_segmentation_generator(images_path, segs_path, batch_size,
                                      input_height, ordering=IMAGE_ORDERING))
             Y.append(get_segmentation_array(
                 seg, n_classes, output_width, output_height))
+            # print(i)
+            # i = i + 1
 
         yield np.array(X), np.array(Y)

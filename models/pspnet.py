@@ -42,13 +42,13 @@ def pool_block(feats, pool_factor):
     return x
 
 
-def _pspnet(n_classes, encoder,  input_height=384, input_width=576):
+def _pspnet(n_classes, encoder,  input_height=384, input_width=576, pretrained='imagenet'):
 
     assert input_height % 192 == 0
     assert input_width % 192 == 0
 
     img_input, levels = encoder(
-        input_height=input_height,  input_width=input_width)
+        input_height=input_height,  input_width=input_width, pretrained=pretrained)
     [f1, f2, f3, f4, f5] = levels
 
     o = f5
@@ -82,9 +82,9 @@ def pspnet(n_classes,  input_height=384, input_width=576):
     return model
 
 
-def vgg_pspnet(n_classes,  input_height=384, input_width=576):
+def vgg_pspnet(n_classes,  input_height=384, input_width=576, pretrained='imagenet'):
 
-    model = _pspnet(n_classes, get_vgg_encoder,
+    model = _pspnet(n_classes, get_vgg_encoder, pretrained=pretrained,
                     input_height=input_height, input_width=input_width)
     model.model_name = "vgg_pspnet"
     return model

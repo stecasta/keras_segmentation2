@@ -293,14 +293,18 @@ def _augment_seg(img, seg, augmentation_name="aug_all"):
         loaded_augmentation_name = augmentation_name
 
     # Create a deterministic augmentation from the random one
-    aug_det = IMAGE_AUGMENTATION_SEQUENCE.to_deterministic()
+    # aug_det = IMAGE_AUGMENTATION_SEQUENCE.to_deterministic()
     # Augment the input image
-    image_aug = aug_det.augment_image(img)
+    # image_aug = aug_det.augment_image(img)
+    #
+    # segmap = ia.SegmentationMapOnImage(seg, nb_classes = np.max(seg) + 1, shape = img.shape)
+    #
+    # segmap_aug = aug_det.augment_segmentation_maps(segmap)
+    # segmap_aug = segmap_aug.get_arr_int()
 
-    segmap = ia.SegmentationMapOnImage(seg, nb_classes = np.max(seg) + 1, shape = img.shape)
-
-    segmap_aug = aug_det.augment_segmentation_maps(segmap)
-    segmap_aug = segmap_aug.get_arr_int()
+    segmap = ia.SegmentationMapsOnImage(seg, shape=img.shape)  # note the s compared to above
+    image_aug, segmap_aug = IMAGE_AUGMENTATION_SEQUENCE(image=img, segmentation_maps=segmap)
+    segmap_aug = segmap_aug.get_arr()
 
     return image_aug, segmap_aug
 
